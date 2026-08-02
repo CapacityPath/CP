@@ -127,6 +127,9 @@ code{font-family:"Chivo Mono",monospace;font-size:.88em;background:var(--wash);p
   padding:4px 6px;border-radius:3px;border:0;flex-shrink:0}
 .free.on{background:#E4F3EC;color:var(--ok)}
 .free.off{background:var(--wash);color:#B4C0D2}
+.editbtn{font-family:Archivo;font-weight:700;font-size:11.5px;letter-spacing:.02em;
+  background:var(--gold);color:var(--deep);border:0;padding:7px 12px;border-radius:4px;flex-shrink:0}
+.editbtn:hover{background:#FFBE24}
 .add{width:100%;background:none;border:0;border-top:1px dashed var(--line);padding:10px;
   font-family:Archivo;font-weight:600;font-size:12.5px;color:var(--dim);text-align:left;padding-left:45px}
 .add:hover{color:var(--navy);background:var(--wash2)}
@@ -567,8 +570,8 @@ function paintUnits(){
       + u.lessons.map(function(l){
           return '<div class="les" draggable="true" data-l="' + l.id + '" data-u="' + u.id + '">'
             + '<span class="grip">&#9868;</span>'
-            + '<input class="nm" value="' + esc(l.title) + '" oninput="editLesson(\'' + l.id + '\',{title:this.value})">'
-            + '<button class="tag" style="background:var(--wash);color:var(--navy)" onclick="openLesson(\'' + l.id + '\')">Edit</button>'
+            + '<input class="nm" value="' + esc(l.title) + '" title="Double-click to edit content" oninput="editLesson(\'' + l.id + '\',{title:this.value})" ondblclick="openLesson(\'' + l.id + '\')">'
+            + '<button class="editbtn" onclick="openLesson(\'' + l.id + '\')">Edit content</button>'
             + '<button class="free ' + (l.is_free?'on':'off') + '" title="Free preview" onclick="editLesson(\'' + l.id + '\',{is_free:' + (!l.is_free) + '},true)">Free</button>'
             + '<button class="tag ' + l.kind + '" title="Change type" onclick="cycleKind(\'' + l.id + '\')">' + l.kind + '</button>'
             + '<input class="dur" value="' + esc(l.duration) + '" oninput="editLesson(\'' + l.id + '\',{duration:this.value})">'

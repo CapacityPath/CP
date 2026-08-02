@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Systemic Thrive — Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Chivo+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F2D6F; --deep:#001E53; --ink:#000A78; --gold:#F2A900; --gold-d:#A87200;
+  --mist:#DDE4EE; --wash:#F1F4F9; --wash2:#F8FAFC; --line:#E2E8F1;
+  --body:#42506A; --dim:#7686A0; --ok:#1F7A55; --bad:#B3261E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--wash);color:var(--body);font-family:"Source Serif 4",Georgia,serif;
+  font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:Archivo,system-ui,sans-serif;color:var(--deep);letter-spacing:-.025em;line-height:1.15;margin:0;font-weight:800}
+button{font:inherit;cursor:pointer}
+.ops{font-family:"Chivo Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:500}
+.hide{display:none!important}
+code{font-family:"Chivo Mono",monospace;font-size:.88em;background:var(--wash);padding:2px 6px;border-radius:3px}
+
+.btn{font-family:Archivo;font-weight:700;font-size:14px;border:0;padding:11px 20px;border-radius:4px;transition:.14s;
+  text-decoration:none;display:inline-block;text-align:center}
+.b-navy{background:var(--navy);color:#fff}.b-navy:hover{background:var(--ink)}
+.b-gold{background:var(--gold);color:var(--deep)}.b-gold:hover{background:#FFBE24}
+.b-ghost{background:#fff;color:var(--deep);box-shadow:inset 0 0 0 1.5px var(--line)}
+.b-ghost:hover{box-shadow:inset 0 0 0 1.5px var(--navy)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* gates */
+.gate{min-height:100vh;display:grid;place-items:center;padding:30px}
+.gcard{background:#fff;border:1px solid var(--line);border-radius:8px;max-width:520px;width:100%;
+  padding:36px 38px;box-shadow:0 26px 60px -30px rgba(0,30,83,.4)}
+.gcard .mark{display:flex;align-items:baseline;gap:10px;margin-bottom:24px}
+.gcard .mark b{font-family:Archivo;font-weight:900;font-size:16px;color:var(--deep);letter-spacing:-.03em}
+.gcard .mark i{font-style:normal;font-family:"Chivo Mono",monospace;font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--gold-d)}
+.gcard h1{font-size:23px;margin-bottom:12px}
+.f{margin-bottom:14px}
+.f label{display:block;font-family:Archivo;font-weight:700;font-size:11px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.f input{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:4px;
+  font-family:"Source Serif 4",serif;font-size:15.5px;color:var(--deep)}
+.f input:focus{outline:0;border-color:var(--navy)}
+.msg{padding:12px 15px;border-radius:4px;font-size:15px;margin-top:14px}
+.msg.ok{background:#E4F3EC;color:var(--ok)}
+.msg.err{background:#FDECEA;color:var(--bad)}
+
+/* topbar */
+.topbar{background:var(--deep);position:sticky;top:0;z-index:60}
+.tb{max-width:1240px;margin:0 auto;padding:0 26px;height:60px;display:flex;align-items:center;gap:22px}
+.tb .lg{display:flex;align-items:baseline;gap:9px;text-decoration:none;background:none;border:0;padding:0}
+.tb .lg b{font-family:Archivo;font-weight:900;font-size:15px;color:#fff;letter-spacing:-.03em}
+.tb .lg i{font-style:normal;font-family:"Chivo Mono",monospace;font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--gold)}
+.tb .who{margin-left:auto;display:flex;align-items:center;gap:14px;color:#A9BCD8;font-size:14px}
+.tb .who button{background:none;border:0;color:#A9BCD8;font-family:"Chivo Mono",monospace;font-size:9.5px;
+  letter-spacing:.11em;text-transform:uppercase}
+.tb .who button:hover{color:#fff}
+.adminflag{font-family:"Chivo Mono",monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  background:rgba(242,169,0,.18);color:var(--gold);padding:4px 8px;border-radius:3px}
+
+.wrap{max-width:1240px;margin:0 auto;padding:0 26px}
+
+/* catalog */
+.cat{padding:40px 0 70px}
+.cat h1{font-size:30px;margin-bottom:6px}
+.cat .sub{color:var(--dim);margin-bottom:32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.ccard{background:#fff;border:1px solid var(--line);border-radius:6px;padding:22px;display:flex;flex-direction:column;
+  transition:transform .16s,box-shadow .16s;text-align:left;width:100%}
+.ccard:hover{transform:translateY(-3px);box-shadow:0 18px 40px -22px rgba(0,30,83,.4)}
+.ccard .trk{font-family:"Chivo Mono",monospace;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+.ccard h3{font-size:18px;margin:10px 0 9px}
+.ccard p{margin:0 0 16px;font-size:15px;color:var(--body);flex:1}
+.ccard .foot{display:flex;align-items:center;gap:9px;padding-top:14px;border-top:1px solid var(--line)}
+.pill{font-family:"Chivo Mono",monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:3px}
+.pill.ce{background:#FDF1DC;color:var(--gold-d)}
+.pill.draft{background:var(--wash);color:var(--dim)}
+.pill.live{background:#E4F3EC;color:var(--ok)}
+.ccard .meter{height:5px;background:var(--wash);border-radius:3px;overflow:hidden;margin-top:14px}
+.ccard .meter i{display:block;height:100%;background:var(--navy)}
+.empty{background:#fff;border:1px dashed var(--mist);border-radius:6px;padding:44px;text-align:center;color:var(--dim)}
+
+/* player */
+.player{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 60px);align-items:start}
+.outline{background:#fff;border-right:1px solid var(--line);min-height:calc(100vh - 60px);position:sticky;top:60px;
+  max-height:calc(100vh - 60px);overflow:auto}
+.o-head{padding:20px 22px;border-bottom:1px solid var(--line)}
+.o-head .back{background:none;border:0;color:var(--dim);font-family:Archivo;font-weight:600;font-size:13px;padding:0 0 12px}
+.o-head .back:hover{color:var(--deep)}
+.o-head h2{font-size:17px;line-height:1.25}
+.o-head .meter{height:5px;background:var(--wash);border-radius:3px;overflow:hidden;margin:14px 0 8px}
+.o-head .meter i{display:block;height:100%;background:var(--gold);transition:width .3s}
+.o-head .stat{font-family:"Chivo Mono",monospace;font-size:10px;letter-spacing:.09em;color:var(--dim);
+  display:flex;justify-content:space-between}
+.o-unit{padding:15px 22px 5px;font-family:"Chivo Mono",monospace;font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);background:var(--wash2)}
+.o-les{width:100%;text-align:left;background:#fff;border:0;border-top:1px solid var(--line);
+  padding:12px 20px 12px 44px;position:relative;font-family:"Source Serif 4",serif;font-size:15px;
+  color:var(--body);line-height:1.4;border-left:3px solid transparent;display:block}
+.o-les:hover{background:var(--wash2)}
+.o-les[aria-current="true"]{background:var(--wash2);border-left-color:var(--gold);color:var(--deep);font-weight:600}
+.o-les .tick{position:absolute;left:19px;top:14px;width:15px;height:15px;border:1.5px solid var(--mist);
+  border-radius:3px;background:#fff}
+.o-les.done .tick{background:var(--ok);border-color:var(--ok)}
+.o-les.done .tick::after{content:"";position:absolute;left:4.5px;top:1.5px;width:4px;height:8px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(43deg)}
+.o-les .d{float:right;font-family:"Chivo Mono",monospace;font-size:10px;color:var(--dim);margin-left:8px}
+.o-les .k{display:inline-block;font-family:"Chivo Mono",monospace;font-size:8px;letter-spacing:.1em;
+  text-transform:uppercase;padding:2px 5px;border-radius:2px;margin-right:7px;vertical-align:1px}
+.k.video{background:#E8EEF9;color:var(--navy)}
+.k.read{background:#EFEAF7;color:#5B3E8E}
+.k.quiz{background:#FDF1DC;color:var(--gold-d)}
+.k.live{background:#E4F3EC;color:var(--ok)}
+
+.stage{background:#fff;min-height:calc(100vh - 60px)}
+.vid{background:var(--deep);aspect-ratio:16/9;position:relative}
+.vid iframe{width:100%;height:100%;border:0;display:block}
+.vid .none{position:absolute;inset:0;display:grid;place-items:center;color:#8FA3C4;text-align:center;padding:30px;
+  font-family:"Chivo Mono",monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase}
+.lbody{padding:34px 42px 40px;max-width:760px}
+.lbody .ops{color:var(--dim);display:block;margin-bottom:10px}
+.lbody h1{font-size:29px;margin-bottom:20px}
+.lbody p{margin:0 0 17px;font-size:17.5px;line-height:1.7}
+.lbody .placeholder{color:var(--dim);font-style:italic}
+.foot{border-top:1px solid var(--line);padding:18px 42px;display:flex;align-items:center;gap:12px;background:var(--wash2)}
+.foot .sp{margin-left:auto}
+.mark{background:var(--ok);color:#fff;border:0;padding:11px 20px;border-radius:4px;font-family:Archivo;font-weight:700;font-size:14px}
+.mark[data-on="1"]{background:#fff;color:var(--ok);box-shadow:inset 0 0 0 1.5px var(--ok)}
+
+/* quiz */
+.q{border:1px solid var(--line);border-radius:6px;margin-bottom:16px;overflow:hidden}
+.q-h{background:var(--wash2);padding:14px 18px;border-bottom:1px solid var(--line);font-family:Archivo;
+  font-weight:700;font-size:16.5px;color:var(--deep);letter-spacing:-.02em}
+.q-h .ops{color:var(--dim);display:block;margin-bottom:5px}
+.a{display:flex;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid var(--line);width:100%;
+  background:#fff;border-left:0;border-right:0;border-bottom:0;text-align:left;font-family:"Source Serif 4",serif;
+  font-size:16px;color:var(--deep)}
+.a:first-of-type{border-top:0}
+.a:hover{background:var(--wash2)}
+.a .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--mist);flex-shrink:0}
+.a[aria-pressed="true"] .dot{border-color:var(--navy);background:var(--navy);box-shadow:inset 0 0 0 3px #fff}
+.a.right{background:#E8F5EE}.a.right .dot{border-color:var(--ok);background:var(--ok);box-shadow:inset 0 0 0 3px #fff}
+.a.wrong{background:#FDECEA}.a.wrong .dot{border-color:var(--bad);background:var(--bad);box-shadow:inset 0 0 0 3px #fff}
+.score{background:var(--wash2);border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin-bottom:18px}
+.score b{font-family:Archivo;font-size:19px;color:var(--deep);display:block;margin-bottom:4px}
+.score.pass{background:#E8F5EE;border-color:#BEE0CE}
+.score.fail{background:#FDECEA;border-color:#F3C6C1}
+
+@media (max-width:900px){
+  .player{grid-template-columns:1fr}
+  .outline{position:static;max-height:none;min-height:0;border-right:0;border-bottom:1px solid var(--line)}
+  .lbody,.foot{padding-left:22px;padding-right:22px}
+}
+</style>
+</head>
+<body>
+
+<!-- setup -->
+<div class="gate" id="g-setup">
+  <div class="gcard">
+    <div class="mark"><b>SYSTEMIC THRIVE</b><i>Learning</i></div>
+    <h1>Connect your database</h1>
+    <p>Same two values you used in the Studio.</p>
+    <div class="f"><label for="cfgUrl">Project URL</label><input id="cfgUrl" placeholder="https://abcdefgh.supabase.co" spellcheck="false"></div>
+    <div class="f"><label for="cfgKey">anon public key</label><input id="cfgKey" placeholder="eyJhbGciOi..." spellcheck="false"></div>
+    <button class="btn b-gold" id="cfgSave" style="width:100%;padding:13px">Connect</button>
+    <div id="cfgMsg"></div>
+  </div>
+</div>
+
+<!-- login -->
+<div class="gate hide" id="g-login">
+  <div class="gcard">
+    <div class="mark"><b>SYSTEMIC THRIVE</b><i>Learning</i></div>
+    <h1>Sign in</h1>
+    <p>We'll email you a link — no password needed.</p>
+    <div class="f"><label for="email">Email</label><input id="email" type="email" placeholder="you@agency.gov" autocomplete="email"></div>
+    <button class="btn b-gold" id="sendLink" style="width:100%;padding:13px">Email me a sign-in link</button>
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<!-- app -->
+<div class="hide" id="g-app">
+  <div class="topbar">
+    <div class="tb">
+      <button class="lg" onclick="goCatalog()"><b>SYSTEMIC THRIVE</b><i>by Capacity Path</i></button>
+      <div class="who">
+        <span class="adminflag hide" id="adminFlag">Admin preview</span>
+        <span id="whoami"></span>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- catalog -->
+  <div class="wrap cat" id="v-cat">
+    <h1>My learning</h1>
+    <p class="sub" id="catSub"></p>
+    <div class="grid" id="catGrid"></div>
+  </div>
+
+  <!-- player -->
+  <div class="player hide" id="v-play">
+    <aside class="outline">
+      <div class="o-head">
+        <button class="back" onclick="goCatalog()">&larr; All courses</button>
+        <h2 id="pTitle"></h2>
+        <div class="meter"><i id="pFill"></i></div>
+        <div class="stat"><span id="pCount"></span><span id="pCe"></span></div>
+      </div>
+      <div id="pOutline"></div>
+    </aside>
+    <main class="stage" id="pStage"></main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var SUPABASE_URL      = localStorage.getItem('st_url') || '';
+var SUPABASE_ANON_KEY = localStorage.getItem('st_key') || '';
+var BUNNY_LIBRARY     = localStorage.getItem('st_bunny') || '';
+
+var $ = function(i){ return document.getElementById(i); };
+var sb=null, me=null, profile=null, isAdmin=false;
+var courses=[], course=null, units=[], done={}, curLes=null, quizState={};
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function screen(id){ ['g-setup','g-login','g-app'].forEach(function(x){ $(x).classList.toggle('hide', x!==id); }); }
+
+/* ---------- boot ---------- */
+(async function(){
+  if(!SUPABASE_URL || !SUPABASE_ANON_KEY){ screen('g-setup'); return; }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  var r = await sb.auth.getSession();
+  if(!r.data.session){ screen('g-login'); return; }
+  me = r.data.session.user;
+  var p = await sb.from('profiles').select('*').eq('id', me.id).maybeSingle();
+  profile = p.data;
+  isAdmin = !!(profile && profile.role === 'admin');
+  $('whoami').textContent = me.email;
+  $('adminFlag').classList.toggle('hide', !isAdmin);
+  screen('g-app');
+  await loadCatalog();
+})();
+
+$('cfgSave').onclick = function(){
+  var u = $('cfgUrl').value.trim().replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
+  var k = $('cfgKey').value.trim();
+  if(!/^https:\/\/.+\.supabase\.co$/.test(u)){ $('cfgMsg').innerHTML='<div class="msg err">URL should look like https://something.supabase.co</div>'; return; }
+  if(k.indexOf('ey')!==0){ $('cfgMsg').innerHTML='<div class="msg err">That key looks off — it should start with ey</div>'; return; }
+  localStorage.setItem('st_url',u); localStorage.setItem('st_key',k);
+  location.reload();
+};
+
+$('sendLink').onclick = async function(){
+  var em = $('email').value.trim();
+  if(!em){ $('loginMsg').innerHTML='<div class="msg err">Enter an email.</div>'; return; }
+  this.disabled=true; this.textContent='Sending…';
+  var r = await sb.auth.signInWithOtp({ email:em, options:{ emailRedirectTo: location.href.split('#')[0] } });
+  this.disabled=false; this.textContent='Email me a sign-in link';
+  $('loginMsg').innerHTML = r.error ? '<div class="msg err">'+esc(r.error.message)+'</div>'
+    : '<div class="msg ok">Check your inbox.</div>';
+};
+$('email').addEventListener('keydown', function(e){ if(e.key==='Enter') $('sendLink').click(); });
+async function signOut(){ await sb.auth.signOut(); location.reload(); }
+
+/* ---------- catalog ---------- */
+async function loadCatalog(){
+  var r = await sb.from('courses').select('*').order('sort_order');
+  if(r.error){ $('catGrid').innerHTML='<div class="empty">'+esc(r.error.message)+'</div>'; return; }
+  courses = r.data || [];
+
+  var pr = await sb.from('progress').select('lesson_id');
+  var doneIds = {};
+  (pr.data||[]).forEach(function(x){ doneIds[x.lesson_id]=1; });
+
+  var ls = await sb.from('lessons').select('id,course_id');
+  var byCourse = {};
+  (ls.data||[]).forEach(function(l){
+    byCourse[l.course_id] = byCourse[l.course_id] || {n:0,d:0};
+    byCourse[l.course_id].n++;
+    if(doneIds[l.id]) byCourse[l.course_id].d++;
+  });
+
+  $('catSub').textContent = isAdmin
+    ? 'You can see drafts because you\u2019re an admin. Learners only see published courses.'
+    : '';
+
+  $('catGrid').innerHTML = courses.length ? courses.map(function(c){
+    var s = byCourse[c.id] || {n:0,d:0};
+    var pct = s.n ? Math.round(s.d/s.n*100) : 0;
+    return '<button class="ccard" onclick="openCourse(\'' + c.id + '\')">'
+      + '<span class="trk">' + esc(c.track||'') + '</span>'
+      + '<h3>' + esc(c.title) + '</h3>'
+      + '<p>' + esc(c.summary || '') + '</p>'
+      + '<div class="foot">'
+      +   (c.ce_hours ? '<span class="pill ce">' + c.ce_hours + ' CE</span>' : '')
+      +   '<span class="pill ' + (c.status==='published'?'live':'draft') + '">' + c.status + '</span>'
+      +   '<span style="margin-left:auto;font-family:\'Chivo Mono\',monospace;font-size:10px;color:var(--dim)">'
+      +     s.n + ' lessons</span>'
+      + '</div>'
+      + (s.n ? '<div class="meter"><i style="width:' + pct + '%"></i></div>' : '')
+      + '</button>';
+  }).join('') : '<div class="empty">No courses yet. Build one in the Studio.</div>';
+}
+
+function goCatalog(){
+  $('v-cat').classList.remove('hide');
+  $('v-play').classList.add('hide');
+  course=null; curLes=null;
+  loadCatalog();
+  window.scrollTo(0,0);
+}
+
+/* ---------- player ---------- */
+async function openCourse(id){
+  course = courses.filter(function(c){ return c.id===id; })[0];
+  if(!course) return;
+  var u = await sb.from('units').select('*').eq('course_id',id).order('sort_order');
+  var l = await sb.from('lessons').select('*').eq('course_id',id).order('sort_order');
+  if(l.error){ alert(l.error.message); return; }
+  units = (u.data||[]).map(function(x){
+    x.lessons = (l.data||[]).filter(function(y){ return y.unit_id===x.id; });
+    return x;
+  });
+  var pr = await sb.from('progress').select('lesson_id');
+  done = {}; (pr.data||[]).forEach(function(x){ done[x.lesson_id]=1; });
+
+  $('v-cat').classList.add('hide');
+  $('v-play').classList.remove('hide');
+  $('pTitle').textContent = course.title;
+  $('pCe').textContent = (course.ce_hours||0) + ' CE hrs';
+
+  var first = null;
+  units.forEach(function(x){ x.lessons.forEach(function(y){ if(!first) first = y; }); });
+  curLes = first;
+  paintOutline(); paintStage();
+  window.scrollTo(0,0);
+}
+
+function allLessons(){
+  var out=[]; units.forEach(function(u){ u.lessons.forEach(function(l){ out.push(l); }); }); return out;
+}
+
+function paintOutline(){
+  var all = allLessons();
+  var d = all.filter(function(l){ return done[l.id]; }).length;
+  $('pFill').style.width = all.length ? Math.round(d/all.length*100)+'%' : '0%';
+  $('pCount').textContent = d + ' of ' + all.length + ' complete';
+  $('pOutline').innerHTML = units.map(function(u,ui){
+    return '<div class="o-unit">Unit ' + (ui+1) + ' &middot; ' + esc(u.title) + '</div>'
+      + u.lessons.map(function(l){
+          return '<button class="o-les' + (done[l.id]?' done':'') + '" aria-current="' + (curLes && l.id===curLes.id) + '" '
+            + 'onclick="pick(\'' + l.id + '\')"><span class="tick"></span>'
+            + '<span class="d">' + esc(l.duration||'') + '</span>'
+            + '<span class="k ' + l.kind + '">' + l.kind + '</span>'
+            + esc(l.title) + '</button>';
+        }).join('');
+  }).join('');
+}
+
+function pick(id){
+  curLes = allLessons().filter(function(l){ return l.id===id; })[0];
+  quizState = {};
+  paintOutline(); paintStage();
+  window.scrollTo(0,0);
+}
+
+function embed(ref){
+  if(!ref) return '<div class="none">No video attached to this lesson yet</div>';
+  var prov = ref.split(':')[0], id = ref.slice(ref.indexOf(':')+1);
+  if(prov==='youtube') return '<iframe src="https://www.youtube.com/embed/'+encodeURIComponent(id)+'" allowfullscreen></iframe>';
+  if(prov==='vimeo')   return '<iframe src="https://player.vimeo.com/video/'+encodeURIComponent(id)+'" allowfullscreen></iframe>';
+  if(prov==='bunny' && BUNNY_LIBRARY)
+    return '<iframe src="https://iframe.mediadelivery.net/embed/'+BUNNY_LIBRARY+'/'+encodeURIComponent(id)+'" allowfullscreen></iframe>';
+  return '<div class="none">Video set, but the Bunny library ID isn\'t configured on this device</div>';
+}
+
+function para(t){
+  if(!t || !t.trim()) return '<p class="placeholder">No content written for this lesson yet.</p>';
+  return t.split(/\n{2,}/).map(function(p){ return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>'; }).join('');
+}
+
+function paintStage(){
+  if(!curLes){ $('pStage').innerHTML=''; return; }
+  var l = curLes, html='';
+
+  if(l.kind==='video') html += '<div class="vid">' + embed(l.video_ref) + '</div>';
+
+  html += '<div class="lbody"><span class="ops">' + esc(unitOf(l)) + '</span><h1>' + esc(l.title) + '</h1>';
+
+  if(l.kind==='quiz'){
+    html += quizHtml(l);
+  } else {
+    html += para(l.body);
+  }
+  html += '</div>';
+
+  var all = allLessons(), i = all.findIndex(function(x){ return x.id===l.id; });
+  html += '<div class="foot">'
+    + (i>0 ? '<button class="btn b-ghost" onclick="pick(\''+all[i-1].id+'\')">&larr; Previous</button>' : '')
+    + '<button class="mark" data-on="' + (done[l.id]?1:0) + '" onclick="toggleDone()">'
+    + (done[l.id]?'\u2713 Completed':'Mark complete') + '</button>'
+    + '<span class="sp"></span>'
+    + (i<all.length-1 ? '<button class="btn b-navy" onclick="pick(\''+all[i+1].id+'\')">Next lesson &rarr;</button>' : '')
+    + '</div>';
+
+  $('pStage').innerHTML = html;
+}
+
+function unitOf(l){
+  var u = units.filter(function(x){ return x.id===l.unit_id; })[0];
+  return u ? u.title : '';
+}
+
+/* ---------- quiz ---------- */
+function quizHtml(l){
+  var qs = Array.isArray(l.quiz) ? l.quiz : [];
+  if(!qs.length) return '<p class="placeholder">No questions have been added to this quiz yet.</p>';
+  var out = '';
+  if(quizState.scored){
+    var right = qs.filter(function(q,i){ return quizState.pick[i]===q.correct; }).length;
+    var pass = right/qs.length >= 0.8;
+    out += '<div class="score ' + (pass?'pass':'fail') + '"><b>' + right + ' of ' + qs.length + ' correct</b>'
+      + (pass ? 'Passed. You can mark this lesson complete.' : 'Not quite — 80% is needed to pass. Review and try again.')
+      + '</div>';
+  }
+  out += qs.map(function(q,qi){
+    return '<div class="q"><div class="q-h"><span class="ops">Question ' + (qi+1) + '</span>' + esc(q.q||'') + '</div>'
+      + (q.a||[]).map(function(opt,oi){
+          var cls='', picked = quizState.pick && quizState.pick[qi]===oi;
+          if(quizState.scored){
+            if(oi===q.correct) cls=' right';
+            else if(picked) cls=' wrong';
+          }
+          return '<button class="a' + cls + '" aria-pressed="' + !!picked + '" onclick="answer(' + qi + ',' + oi + ')">'
+            + '<span class="dot"></span>' + esc(opt) + '</button>';
+        }).join('')
+      + '</div>';
+  }).join('');
+  if(!quizState.scored){
+    out += '<button class="btn b-gold" onclick="scoreQuiz()" style="width:100%;padding:14px">Check my answers</button>';
+  } else {
+    out += '<button class="btn b-ghost" onclick="quizState={};paintStage()" style="width:100%;padding:14px">Try again</button>';
+  }
+  return out;
+}
+function answer(qi,oi){
+  quizState.pick = quizState.pick || {};
+  quizState.pick[qi] = oi;
+  quizState.scored = false;
+  paintStage();
+}
+function scoreQuiz(){
+  var qs = curLes.quiz || [];
+  quizState.pick = quizState.pick || {};
+  if(Object.keys(quizState.pick).length < qs.length){ alert('Answer every question first.'); return; }
+  quizState.scored = true;
+  paintStage();
+}
+
+/* ---------- progress ---------- */
+async function toggleDone(){
+  if(!curLes) return;
+  var id = curLes.id;
+  if(done[id]){
+    delete done[id];
+    await sb.from('progress').delete().eq('lesson_id', id).eq('user_id', me.id);
+  } else {
+    done[id] = 1;
+    await sb.from('progress').upsert({ user_id: me.id, lesson_id: id }, { onConflict: 'user_id,lesson_id' });
+  }
+  paintOutline(); paintStage();
+}
+</script>
+</body>
+</html>

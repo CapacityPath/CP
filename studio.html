@@ -157,6 +157,46 @@ code{font-family:"Chivo Mono",monospace;font-size:.88em;background:var(--wash);p
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.bad{background:var(--bad)}
 
+/* ── lesson editor drawer ── */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,94vw);background:#fff;z-index:200;
+  box-shadow:-30px 0 70px -30px rgba(0,30,83,.55);display:flex;flex-direction:column;
+  transform:translateX(102%);transition:transform .26s cubic-bezier(.2,.9,.3,1)}
+.drawer.on{transform:translateX(0)}
+.dscrim{position:fixed;inset:0;background:rgba(0,15,45,.42);z-index:190;opacity:0;pointer-events:none;transition:opacity .26s}
+.dscrim.on{opacity:1;pointer-events:auto}
+.dhead{padding:20px 26px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:14px}
+.dhead .ops{color:var(--dim);display:block;margin-bottom:6px}
+.dhead h2{font-size:20px;line-height:1.2}
+.dhead .close{margin-left:auto;background:none;border:0;font-size:24px;color:var(--dim);line-height:1;padding:0 6px}
+.dhead .close:hover{color:var(--deep)}
+.dbody{padding:22px 26px 40px;overflow:auto;flex:1}
+.dkinds{display:flex;gap:7px;margin-bottom:22px;flex-wrap:wrap}
+.dkinds button{font-family:Archivo;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:4px;border:1.5px solid var(--line);
+  background:#fff;color:var(--dim)}
+.dkinds button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.dbody textarea.body{min-height:340px;font-family:"Source Serif 4",serif;font-size:16px;line-height:1.7;
+  width:100%;padding:16px 18px;border:1.5px solid var(--line);border-radius:5px;color:var(--deep);resize:vertical}
+.dbody textarea.body:focus{outline:0;border-color:var(--navy)}
+.hint{font-size:14px;color:var(--dim);margin:8px 0 20px;line-height:1.55}
+.qz{border:1px solid var(--line);border-radius:6px;margin-bottom:14px;overflow:hidden}
+.qz-h{background:var(--wash2);padding:11px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.qz-h .ops{color:var(--dim);flex-shrink:0}
+.qz-h input{flex:1;border:0;background:transparent;font-family:"Source Serif 4",serif;font-size:15.5px;
+  color:var(--deep);padding:5px 7px;border-radius:3px;min-width:0}
+.qz-h input:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+.qz-h input:focus{outline:0;background:#fff;box-shadow:inset 0 0 0 1.5px var(--navy)}
+.opt{display:flex;align-items:center;gap:11px;padding:9px 15px;border-top:1px solid var(--line)}
+.opt:first-child{border-top:0}
+.opt .pick{width:19px;height:19px;border-radius:50%;border:2px solid var(--mist);flex-shrink:0;background:#fff;padding:0}
+.opt .pick[aria-pressed="true"]{border-color:var(--ok);background:var(--ok);box-shadow:inset 0 0 0 3px #fff}
+.opt input{flex:1;border:0;background:transparent;font-family:"Source Serif 4",serif;font-size:15px;
+  color:var(--deep);padding:5px 7px;border-radius:3px;min-width:0}
+.opt input:hover{background:var(--wash2)}
+.opt input:focus{outline:0;background:#fff;box-shadow:inset 0 0 0 1.5px var(--navy)}
+.vidbox{background:var(--wash2);border:1px dashed var(--mist);border-radius:6px;padding:24px;text-align:center;margin-bottom:18px}
+.vidbox .ops{color:var(--dim);display:block;margin-bottom:8px}
+.vidbox p{margin:0 0 4px;font-size:15px}
+
 @media (max-width:1080px){
   .app{grid-template-columns:1fr;height:auto;overflow:visible}
   .side{display:none}
@@ -277,6 +317,18 @@ code{font-family:"Chivo Mono",monospace;font-size:.88em;background:var(--wash);p
       </div>
     </div>
   </div>
+</div>
+
+<div class="dscrim" id="dscrim" onclick="closeLesson()"></div>
+<div class="drawer" id="drawer">
+  <div class="dhead">
+    <div style="min-width:0">
+      <span class="ops" id="dCrumb"></span>
+      <h2 id="dTitle"></h2>
+    </div>
+    <button class="close" onclick="closeLesson()" title="Close">&times;</button>
+  </div>
+  <div class="dbody" id="dBody"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -492,6 +544,7 @@ function paintUnits(){
           return '<div class="les" draggable="true" data-l="' + l.id + '" data-u="' + u.id + '">'
             + '<span class="grip">&#9868;</span>'
             + '<input class="nm" value="' + esc(l.title) + '" oninput="editLesson(\'' + l.id + '\',{title:this.value})">'
+            + '<button class="tag" style="background:var(--wash);color:var(--navy)" onclick="openLesson(\'' + l.id + '\')">Edit</button>'
             + '<button class="free ' + (l.is_free?'on':'off') + '" title="Free preview" onclick="editLesson(\'' + l.id + '\',{is_free:' + (!l.is_free) + '},true)">Free</button>'
             + '<button class="tag ' + l.kind + '" title="Change type" onclick="cycleKind(\'' + l.id + '\')">' + l.kind + '</button>'
             + '<input class="dur" value="' + esc(l.duration) + '" oninput="editLesson(\'' + l.id + '\',{duration:this.value})">'
@@ -518,6 +571,7 @@ function editLesson(id, patch, repaint){
   var f = findLesson(id); if(!f) return;
   Object.keys(patch).forEach(function(k){ f.l[k] = patch[k]; });
   if(repaint) paintUnits(); else paintPreview();
+  if(openId === id && patch.title !== undefined) $('dTitle').textContent = patch.title || 'Untitled lesson';
   clearTimeout(lessonTimers[id]);
   lessonTimers[id] = setTimeout(async function(){
     saving();
@@ -637,6 +691,95 @@ function wireDrag(){
       if(r.error) oops(r.error); else say('Reordered');
     });
   });
+}
+
+/* ---------- lesson editor drawer ---------- */
+var openId = null;
+var KIND_LABEL = { video:'Video', read:'Reading', quiz:'Quiz', live:'Live session' };
+
+function openLesson(id){
+  var f = findLesson(id); if(!f) return;
+  openId = id;
+  $('dCrumb').textContent = f.u.title;
+  $('dTitle').textContent = f.l.title || 'Untitled lesson';
+  paintDrawer();
+  $('drawer').classList.add('on');
+  $('dscrim').classList.add('on');
+}
+function closeLesson(){
+  openId = null;
+  $('drawer').classList.remove('on');
+  $('dscrim').classList.remove('on');
+}
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLesson(); });
+
+function paintDrawer(){
+  var f = findLesson(openId); if(!f) return;
+  var l = f.l;
+  var kinds = ['video','read','quiz','live'].map(function(k){
+    return '<button aria-pressed="' + (l.kind === k) + '" onclick="setKind(\'' + k + '\')">' + KIND_LABEL[k] + '</button>';
+  }).join('');
+
+  var main = '';
+  if(l.kind === 'quiz'){
+    var qs = Array.isArray(l.quiz) ? l.quiz : [];
+    main = '<p class="hint">Each question needs one correct answer — click the circle beside it. Learners must pass the quiz to complete the course and earn their certificate.</p>'
+      + qs.map(function(q, qi){
+          return '<div class="qz">'
+            + '<div class="qz-h"><span class="ops">Q' + (qi+1) + '</span>'
+            + '<input value="' + esc(q.q) + '" placeholder="Type the question" oninput="setQ(' + qi + ', this.value)">'
+            + '<button class="x" title="Delete question" onclick="delQ(' + qi + ')">&times;</button></div>'
+            + (q.a || []).map(function(opt, oi){
+                return '<div class="opt">'
+                  + '<button class="pick" aria-pressed="' + (q.correct === oi) + '" title="Mark correct" onclick="setCorrect(' + qi + ',' + oi + ')"></button>'
+                  + '<input value="' + esc(opt) + '" placeholder="Answer option" oninput="setOpt(' + qi + ',' + oi + ', this.value)">'
+                  + '<button class="x" title="Remove option" onclick="delOpt(' + qi + ',' + oi + ')">&times;</button></div>';
+              }).join('')
+            + '<button class="add" style="padding-left:15px" onclick="addOpt(' + qi + ')">+ Add answer option</button>'
+            + '</div>';
+        }).join('')
+      + '<button class="add-unit" style="margin:6px 0 0;width:100%" onclick="addQ()">+ Add question</button>';
+  } else if(l.kind === 'live'){
+    main = '<p class="hint">Live sessions are scheduled cohort calls. Write what learners should prepare and bring — the joining link gets added closer to the date.</p>'
+      + '<textarea class="body" placeholder="What this session covers, and what to bring." oninput="setBody(this.value)">' + esc(l.body) + '</textarea>';
+  } else {
+    if(l.kind === 'video'){
+      main = '<div class="vidbox"><span class="ops">Video hosting</span>'
+        + '<p>Not connected yet — coming in the next build.</p>'
+        + '<p style="color:var(--dim);font-size:14px">For now, write the script or transcript below. It carries straight over.</p></div>';
+    }
+    main += '<p class="hint">' + (l.kind === 'video'
+        ? 'Script, transcript, or the written version of this lesson.'
+        : 'The full text of this lesson. Blank lines make new paragraphs.') + '</p>'
+      + '<textarea class="body" placeholder="Write the lesson here." oninput="setBody(this.value)">' + esc(l.body) + '</textarea>';
+  }
+
+  $('dBody').innerHTML = '<div class="dkinds">' + kinds + '</div>' + main;
+}
+
+function setKind(k){
+  editLesson(openId, { kind: k }, true);
+  paintDrawer();
+}
+function setBody(v){ editLesson(openId, { body: v }); }
+
+/* quiz helpers — all write through editLesson so they autosave */
+function quizOf(){ var f = findLesson(openId); return (f && Array.isArray(f.l.quiz)) ? f.l.quiz.slice() : []; }
+function saveQuiz(q){ editLesson(openId, { quiz: q }); paintDrawer(); }
+function addQ(){ var q = quizOf(); q.push({ q:'', a:['',''], correct:0 }); saveQuiz(q); }
+function delQ(i){ var q = quizOf(); q.splice(i,1); saveQuiz(q); }
+function setQ(i,v){ var q = quizOf(); q[i].q = v; var f = findLesson(openId); f.l.quiz = q;
+  clearTimeout(lessonTimers[openId]); lessonTimers[openId] = setTimeout(function(){ pushQuiz(q); }, 700); }
+function setOpt(i,o,v){ var q = quizOf(); q[i].a[o] = v; var f = findLesson(openId); f.l.quiz = q;
+  clearTimeout(lessonTimers[openId]); lessonTimers[openId] = setTimeout(function(){ pushQuiz(q); }, 700); }
+function addOpt(i){ var q = quizOf(); q[i].a.push(''); saveQuiz(q); }
+function delOpt(i,o){ var q = quizOf(); q[i].a.splice(o,1); if(q[i].correct >= q[i].a.length) q[i].correct = 0; saveQuiz(q); }
+function setCorrect(i,o){ var q = quizOf(); q[i].correct = o; saveQuiz(q); }
+async function pushQuiz(q){
+  saving();
+  var r = await sb.from('lessons').update({ quiz: q }).eq('id', openId);
+  saved();
+  if(r.error) oops(r.error);
 }
 
 /* ---------- student preview ---------- */

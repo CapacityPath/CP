@@ -193,9 +193,20 @@ code{font-family:"Chivo Mono",monospace;font-size:.88em;background:var(--wash);p
   color:var(--deep);padding:5px 7px;border-radius:3px;min-width:0}
 .opt input:hover{background:var(--wash2)}
 .opt input:focus{outline:0;background:#fff;box-shadow:inset 0 0 0 1.5px var(--navy)}
-.vidbox{background:var(--wash2);border:1px dashed var(--mist);border-radius:6px;padding:24px;text-align:center;margin-bottom:18px}
-.vidbox .ops{color:var(--dim);display:block;margin-bottom:8px}
+.vidbox{background:var(--wash2);border:1px solid var(--line);border-radius:6px;padding:18px;margin-bottom:20px}
+.vidbox .ops{color:var(--dim);display:block;margin-bottom:12px}
 .vidbox p{margin:0 0 4px;font-size:15px}
+.vrow{display:grid;grid-template-columns:132px 1fr;gap:10px;align-items:start}
+.vrow select,.vrow input{padding:10px 12px;border:1.5px solid var(--line);border-radius:4px;
+  font-family:"Source Serif 4",serif;font-size:15px;color:var(--deep);background:#fff;width:100%}
+.vrow input{font-family:"Chivo Mono",monospace;font-size:13px}
+.vrow select:focus,.vrow input:focus{outline:0;border-color:var(--navy)}
+.vprev{margin-top:14px;border-radius:5px;overflow:hidden;background:var(--deep);aspect-ratio:16/9;position:relative}
+.vprev iframe{width:100%;height:100%;border:0;display:block}
+.vprev .none{position:absolute;inset:0;display:grid;place-items:center;color:#8FA3C4;
+  font-family:"Chivo Mono",monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;text-align:center;padding:20px}
+.vhelp{font-size:13.5px;color:var(--dim);margin:12px 0 0;line-height:1.6}
+.vhelp code{font-size:12px}
 
 @media (max-width:1080px){
   .app{grid-template-columns:1fr;height:auto;overflow:visible}
@@ -264,6 +275,7 @@ code{font-family:"Chivo Mono",monospace;font-size:.88em;background:var(--wash);p
     <div class="newc"><button onclick="newCourse()">+ New course</button></div>
     <div class="foot">
       <b id="whoami"></b>
+      <button onclick="setBunny()">Video library</button>
       <button onclick="signOut()">Sign out</button>
     </div>
   </aside>
@@ -338,6 +350,8 @@ code{font-family:"Chivo Mono",monospace;font-size:.88em;background:var(--wash);p
 /* ── config: stored in this browser, or hardcode below if you prefer ── */
 var SUPABASE_URL      = localStorage.getItem('st_url') || '';
 var SUPABASE_ANON_KEY = localStorage.getItem('st_key') || '';
+/* Bunny Stream library ID — set once via the link in the sidebar */
+var BUNNY_LIBRARY = localStorage.getItem('st_bunny') || '';
 
 var $ = function(i){ return document.getElementById(i); };
 var sb = null, me = null, profile = null;
@@ -427,6 +441,16 @@ $('sendLink').onclick = async function(){
 $('email') && $('email').addEventListener('keydown', function(e){ if(e.key==='Enter') $('sendLink').click(); });
 
 async function signOut(){ await sb.auth.signOut(); location.reload(); }
+
+function setBunny(){
+  var v = prompt('Bunny Stream Library ID\n\nFound in Bunny → Stream → your library → API. A short number like 412345.\n\nLeave blank if you are not using Bunny.', BUNNY_LIBRARY || '');
+  if(v === null) return;
+  v = v.trim();
+  if(v) localStorage.setItem('st_bunny', v); else localStorage.removeItem('st_bunny');
+  BUNNY_LIBRARY = v;
+  say(v ? 'Video library set' : 'Video library cleared');
+  if(openId) paintDrawer();
+}
 
 /* ---------- courses ---------- */
 async function loadCourses(){
@@ -744,9 +768,24 @@ function paintDrawer(){
       + '<textarea class="body" placeholder="What this session covers, and what to bring." oninput="setBody(this.value)">' + esc(l.body) + '</textarea>';
   } else {
     if(l.kind === 'video'){
-      main = '<div class="vidbox"><span class="ops">Video hosting</span>'
-        + '<p>Not connected yet — coming in the next build.</p>'
-        + '<p style="color:var(--dim);font-size:14px">For now, write the script or transcript below. It carries straight over.</p></div>';
+      var ref = l.video_ref || '';
+      var prov = ref.split(':')[0];
+      if(['bunny','vimeo','youtube'].indexOf(prov) < 0){ prov = 'bunny'; }
+      var vid = ref.indexOf(':') > -1 ? ref.slice(ref.indexOf(':') + 1) : ref;
+
+      main = '<div class="vidbox"><span class="ops">Video</span>'
+        + '<div class="vrow">'
+        +   '<select onchange="setVideo(this.value, document.getElementById(\'vid\').value)">'
+        +     '<option value="bunny"' + (prov==='bunny'?' selected':'') + '>Bunny Stream</option>'
+        +     '<option value="vimeo"' + (prov==='vimeo'?' selected':'') + '>Vimeo</option>'
+        +     '<option value="youtube"' + (prov==='youtube'?' selected':'') + '>YouTube</option>'
+        +   '</select>'
+        +   '<input id="vid" value="' + esc(vid) + '" placeholder="Paste the video ID or full URL" '
+        +     'oninput="setVideo(this.previousElementSibling ? this.parentNode.querySelector(\'select\').value : \'bunny\', this.value)">'
+        + '</div>'
+        + '<div class="vprev">' + embedHtml(prov, vid) + '</div>'
+        + '<p class="vhelp">' + VHELP[prov] + '</p>'
+        + '</div>';
     }
     main += '<p class="hint">' + (l.kind === 'video'
         ? 'Script, transcript, or the written version of this lesson.'
@@ -755,6 +794,60 @@ function paintDrawer(){
   }
 
   $('dBody').innerHTML = '<div class="dkinds">' + kinds + '</div>' + main;
+}
+
+var VHELP = {
+  bunny: 'In Bunny → Stream → your library, click a video and copy its <code>Video ID</code>. You can paste the whole embed URL too — we\'ll pull the ID out. Playback is token-protected, so links can\'t be shared.',
+  vimeo: 'Copy the number from the video\'s URL, e.g. vimeo.com/<code>123456789</code>. Set the video\'s privacy to "Hide from Vimeo" and restrict embedding to your domain.',
+  youtube: 'Paste the watch URL or the ID after <code>v=</code>. Note: unlisted videos stay viewable by anyone who has the link, and access can\'t be revoked later.'
+};
+
+function cleanId(prov, raw){
+  var v = (raw || '').trim();
+  if(!v) return '';
+  if(prov === 'youtube'){
+    var m = v.match(/[?&]v=([\w-]{6,})/) || v.match(/youtu\.be\/([\w-]{6,})/) || v.match(/embed\/([\w-]{6,})/);
+    return m ? m[1] : v.replace(/^https?:\/\/\S+\//,'');
+  }
+  if(prov === 'vimeo'){
+    var m2 = v.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+    return m2 ? m2[1] : v.replace(/\D/g,'');
+  }
+  // bunny: a guid, possibly inside an iframe/embed url
+  var m3 = v.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+  return m3 ? m3[1] : v;
+}
+
+function embedHtml(prov, vid){
+  var id = cleanId(prov, vid);
+  if(!id) return '<div class="none">No video yet — paste an ID above</div>';
+  if(prov === 'youtube')
+    return '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(id) + '" allowfullscreen loading="lazy"></iframe>';
+  if(prov === 'vimeo')
+    return '<iframe src="https://player.vimeo.com/video/' + encodeURIComponent(id) + '" allowfullscreen loading="lazy"></iframe>';
+  if(BUNNY_LIBRARY)
+    return '<iframe src="https://iframe.mediadelivery.net/embed/' + BUNNY_LIBRARY + '/' + encodeURIComponent(id) + '" allowfullscreen loading="lazy"></iframe>';
+  return '<div class="none">Bunny library ID not set yet<br>Saved as ' + esc(id.slice(0,8)) + '…</div>';
+}
+
+var vidTimer;
+function setVideo(prov, raw){
+  var id = cleanId(prov, raw);
+  var val = id ? (prov + ':' + id) : '';
+  var f = findLesson(openId); if(!f) return;
+  f.l.video_ref = val;
+  // live-update just the preview + help, don't redraw the whole panel (keeps focus)
+  var box = document.querySelector('.vprev');
+  if(box) box.innerHTML = embedHtml(prov, id);
+  var help = document.querySelector('.vhelp');
+  if(help) help.innerHTML = VHELP[prov];
+  clearTimeout(vidTimer);
+  vidTimer = setTimeout(async function(){
+    saving();
+    var r = await sb.from('lessons').update({ video_ref: val }).eq('id', openId);
+    saved();
+    if(r.error) oops(r.error);
+  }, 700);
 }
 
 function setKind(k){

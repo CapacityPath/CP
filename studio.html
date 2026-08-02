@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Systemic Thrive — Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Chivo+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F2D6F; --deep:#001E53; --ink:#000A78; --gold:#F2A900; --gold-d:#A87200;
+  --mist:#DDE4EE; --wash:#F1F4F9; --wash2:#F8FAFC; --line:#E2E8F1;
+  --body:#42506A; --dim:#7686A0; --ok:#1F7A55; --bad:#B3261E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--wash);color:var(--body);font-family:"Source Serif 4",Georgia,serif;
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:Archivo,system-ui,sans-serif;color:var(--deep);letter-spacing:-.025em;line-height:1.12;margin:0;font-weight:800}
+button{font:inherit;cursor:pointer}
+code{font-family:"Chivo Mono",monospace;font-size:.88em;background:var(--wash);padding:2px 6px;border-radius:3px;color:var(--deep)}
+.ops{font-family:"Chivo Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:500}
+.hide{display:none!important}
+
+.btn{font-family:Archivo;font-weight:700;font-size:13.5px;border:0;padding:10px 17px;border-radius:4px;transition:.14s;
+  text-decoration:none;display:inline-block;text-align:center}
+.b-navy{background:var(--navy);color:#fff}.b-navy:hover{background:var(--ink)}
+.b-gold{background:var(--gold);color:var(--deep)}.b-gold:hover{background:#FFBE24}
+.b-ghost{background:#fff;color:var(--deep);box-shadow:inset 0 0 0 1.5px var(--line)}
+.b-ghost:hover{box-shadow:inset 0 0 0 1.5px var(--navy)}
+.b-sm{font-size:12px;padding:7px 12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── gate screens ── */
+.gate{min-height:100vh;display:grid;place-items:center;padding:30px}
+.gcard{background:#fff;border:1px solid var(--line);border-radius:8px;max-width:560px;width:100%;
+  padding:38px 40px;box-shadow:0 26px 60px -30px rgba(0,30,83,.4)}
+.gcard .mark{display:flex;align-items:baseline;gap:10px;margin-bottom:26px}
+.gcard .mark b{font-family:Archivo;font-weight:900;font-size:17px;color:var(--deep);letter-spacing:-.03em}
+.gcard .mark i{font-style:normal;font-family:"Chivo Mono",monospace;font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--gold-d)}
+.gcard h1{font-size:25px;margin-bottom:12px}
+.gcard p{margin:0 0 18px}
+.gcard ol{margin:0 0 20px;padding-left:22px}
+.gcard li{margin-bottom:9px}
+.f{margin-bottom:14px}
+.f label{display:block;font-family:Archivo;font-weight:700;font-size:11px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.f input,.f select,.f textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:4px;
+  font-family:"Source Serif 4",serif;font-size:15.5px;color:var(--deep);background:#fff}
+.f input:focus,.f select:focus,.f textarea:focus{outline:0;border-color:var(--navy)}
+.msg{padding:12px 15px;border-radius:4px;font-size:15px;margin-top:14px}
+.msg.ok{background:#E4F3EC;color:var(--ok)}
+.msg.err{background:#FDECEA;color:var(--bad)}
+
+/* ── app shell ── */
+.app{display:grid;grid-template-columns:250px 1fr;height:100vh;overflow:hidden}
+.side{background:var(--deep);color:#A9BCD8;display:flex;flex-direction:column;padding:20px 0;overflow:auto}
+.side .brand{padding:0 20px 20px;border-bottom:1px solid rgba(169,188,216,.18);margin-bottom:14px}
+.side .brand b{font-family:Archivo;font-weight:900;font-size:14px;color:#fff;letter-spacing:-.02em;display:block}
+.side .brand span{font-family:"Chivo Mono",monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.side .lbl{padding:6px 20px 8px;font-family:"Chivo Mono",monospace;font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:#6E86AC}
+.clist{display:flex;flex-direction:column;gap:2px;padding:0 10px}
+.clist button{background:none;border:0;text-align:left;color:#A9BCD8;font-family:Archivo;font-weight:600;
+  font-size:13.5px;padding:10px 12px;border-radius:4px;line-height:1.35;transition:.14s;display:block;width:100%}
+.clist button:hover{background:rgba(255,255,255,.07);color:#fff}
+.clist button[aria-current="true"]{background:var(--navy);color:#fff}
+.clist button em{font-style:normal;display:block;font-family:"Chivo Mono",monospace;font-size:9px;
+  letter-spacing:.1em;text-transform:uppercase;color:#7E95BA;margin-top:4px}
+.clist button[aria-current="true"] em{color:var(--gold)}
+.side .newc{margin:12px 10px 0}
+.side .newc button{width:100%;background:rgba(255,255,255,.08);border:1px dashed rgba(169,188,216,.4);
+  color:#C4D3E8;font-family:Archivo;font-weight:700;font-size:12.5px;padding:10px;border-radius:4px}
+.side .newc button:hover{border-color:var(--gold);color:var(--gold)}
+.side .foot{margin-top:auto;padding:16px 20px 0;border-top:1px solid rgba(169,188,216,.18);font-size:13px}
+.side .foot b{display:block;font-family:Archivo;color:#fff;font-size:13px;word-break:break-all}
+.side .foot button{background:none;border:0;color:#7E95BA;font-family:"Chivo Mono",monospace;font-size:9px;
+  letter-spacing:.11em;text-transform:uppercase;padding:6px 0 0}
+.side .foot button:hover{color:#fff}
+
+.main{overflow:auto;display:flex;flex-direction:column}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:16px 26px;display:flex;align-items:center;
+  gap:14px;position:sticky;top:0;z-index:20}
+.top h1{font-size:19px}
+.top .sub{font-family:"Chivo Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:5px}
+.top .right{margin-left:auto;display:flex;gap:9px;align-items:center}
+.savedot{font-family:"Chivo Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.savedot.on{color:var(--gold-d)}
+.savedot.done{color:var(--ok)}
+
+.pad{padding:24px 26px 50px}
+.build{display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start}
+.card{background:#fff;border:1px solid var(--line);border-radius:6px}
+.meta{display:grid;grid-template-columns:1fr 140px 96px;gap:13px;padding:18px 20px;border-bottom:1px solid var(--line)}
+
+.unit{border-bottom:1px solid var(--line)}
+.unit-h{display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--wash2)}
+.unit-h .ops{color:var(--dim);flex-shrink:0}
+.unit-h input{border:0;background:transparent;font-family:Archivo;font-weight:800;font-size:14.5px;
+  color:var(--deep);letter-spacing:-.02em;flex:1;padding:4px 6px;border-radius:3px;min-width:0}
+.unit-h input:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+.unit-h input:focus{outline:0;background:#fff;box-shadow:inset 0 0 0 1.5px var(--navy)}
+.x{background:none;border:0;color:#C2CCDC;font-size:15px;padding:2px 6px;border-radius:3px;flex-shrink:0;line-height:1}
+.x:hover{background:#FDE8E8;color:var(--bad)}
+
+.les{display:flex;align-items:center;gap:10px;padding:10px 20px 10px 15px;border-top:1px solid var(--line);
+  background:#fff;cursor:grab}
+.les:hover{background:var(--wash2)}
+.les.drag{opacity:.35}
+.les.over{box-shadow:inset 0 3px 0 var(--gold)}
+.grip{color:#C2CCDC;font-size:13px;flex-shrink:0;user-select:none}
+.les input.nm{border:0;background:transparent;flex:1;font-family:"Source Serif 4",serif;font-size:15px;
+  color:var(--deep);padding:4px 6px;border-radius:3px;min-width:0}
+.les input.nm:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+.les input.nm:focus{outline:0;background:#fff;box-shadow:inset 0 0 0 1.5px var(--navy)}
+.les input.dur{width:58px;flex-shrink:0;border:1.5px solid var(--line);border-radius:3px;padding:5px 6px;
+  font-family:"Chivo Mono",monospace;font-size:11px;color:var(--dim);text-align:center}
+.les input.dur:focus{outline:0;border-color:var(--navy)}
+.tag{font-family:"Chivo Mono",monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 7px;border-radius:3px;flex-shrink:0;border:0}
+.tag.video{background:#E8EEF9;color:var(--navy)}
+.tag.read{background:#EFEAF7;color:#5B3E8E}
+.tag.quiz{background:#FDF1DC;color:var(--gold-d)}
+.tag.live{background:#E4F3EC;color:var(--ok)}
+.free{font-family:"Chivo Mono",monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 6px;border-radius:3px;border:0;flex-shrink:0}
+.free.on{background:#E4F3EC;color:var(--ok)}
+.free.off{background:var(--wash);color:#B4C0D2}
+.add{width:100%;background:none;border:0;border-top:1px dashed var(--line);padding:10px;
+  font-family:Archivo;font-weight:600;font-size:12.5px;color:var(--dim);text-align:left;padding-left:45px}
+.add:hover{color:var(--navy);background:var(--wash2)}
+.add-unit{margin:16px 20px 20px;width:calc(100% - 40px);border:1.5px dashed var(--mist);border-radius:5px;
+  background:none;padding:12px;font-family:Archivo;font-weight:700;font-size:13px;color:var(--dim)}
+.add-unit:hover{border-color:var(--navy);color:var(--navy);background:var(--wash2)}
+
+/* preview */
+.prev{position:sticky;top:82px}
+.phone{background:var(--deep);border-radius:10px;padding:9px;box-shadow:0 24px 50px -22px rgba(0,30,83,.5)}
+.screen{background:#fff;border-radius:5px;overflow:hidden;max-height:66vh;overflow-y:auto}
+.p-head{background:var(--navy);color:#fff;padding:16px 18px}
+.p-head .ops{color:var(--gold);display:block;margin-bottom:7px}
+.p-head h4{color:#fff;font-size:15.5px;line-height:1.2}
+.p-meta{font-family:"Chivo Mono",monospace;font-size:9.5px;letter-spacing:.09em;color:#B8C8E4;margin-top:11px;
+  display:flex;justify-content:space-between}
+.p-unit{padding:13px 18px 5px;font-family:"Chivo Mono",monospace;font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);background:var(--wash2)}
+.p-les{display:flex;align-items:center;gap:10px;padding:9px 18px;border-top:1px solid var(--line);font-size:14px}
+.p-les .tick{width:13px;height:13px;border:1.5px solid var(--mist);border-radius:3px;flex-shrink:0}
+.p-les .t{flex:1;min-width:0;color:var(--deep)}
+.p-les .d{font-family:"Chivo Mono",monospace;font-size:9.5px;color:var(--dim);flex-shrink:0}
+.p-empty{padding:32px 20px;text-align:center;color:var(--dim);font-size:14px}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--deep);
+  color:#fff;padding:12px 22px;border-radius:5px;font-family:Archivo;font-weight:600;font-size:14px;
+  box-shadow:0 16px 34px -14px rgba(0,30,83,.6);transition:transform .26s cubic-bezier(.2,.9,.3,1.2);z-index:99}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.bad{background:var(--bad)}
+
+@media (max-width:1080px){
+  .app{grid-template-columns:1fr;height:auto;overflow:visible}
+  .side{display:none}
+  .build{grid-template-columns:1fr}
+  .prev{position:static}
+  .meta{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ 1. NOT CONFIGURED ══ -->
+<div class="gate" id="g-setup">
+  <div class="gcard">
+    <div class="mark"><b>SYSTEMIC THRIVE</b><i>Studio</i></div>
+    <h1>Connect your database</h1>
+    <p>One-time setup. In Supabase, click the <strong>gear icon</strong> (Project Settings) then <strong>API</strong>, and copy these two values across.</p>
+    <div class="f">
+      <label for="cfgUrl">Project URL</label>
+      <input id="cfgUrl" placeholder="https://abcdefgh.supabase.co" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="f">
+      <label for="cfgKey">anon public key</label>
+      <input id="cfgKey" placeholder="eyJhbGciOiJIUzI1NiIs..." autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn b-gold" id="cfgSave" style="width:100%;padding:13px">Connect</button>
+    <div id="cfgMsg"></div>
+    <p style="font-size:14px;color:var(--dim);margin:18px 0 0">Saved in this browser only. The anon key is designed to be public — your security policies are what protect the data. Never paste the <code>service_role</code> key.</p>
+  </div>
+</div>
+
+<!-- ══ 2. SIGN IN ══ -->
+<div class="gate hide" id="g-login">
+  <div class="gcard">
+    <div class="mark"><b>SYSTEMIC THRIVE</b><i>Studio</i></div>
+    <h1>Sign in</h1>
+    <p>We'll email you a link. No password to remember or reset.</p>
+    <div class="f">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="you@capacitypath.com" autocomplete="email">
+    </div>
+    <button class="btn b-gold" id="sendLink" style="width:100%;padding:13px">Email me a sign-in link</button>
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<!-- ══ 3. NOT ADMIN ══ -->
+<div class="gate hide" id="g-noadmin">
+  <div class="gcard">
+    <div class="mark"><b>SYSTEMIC THRIVE</b><i>Studio</i></div>
+    <h1>You're signed in, but not an admin yet.</h1>
+    <p>Your account exists now. To give it studio access, run this in Supabase → SQL Editor:</p>
+    <p><code id="promoteSql">update public.profiles set role = 'admin' where email = '';</code></p>
+    <p>Then reload this page.</p>
+    <button class="btn b-ghost" onclick="signOut()">Sign out</button>
+  </div>
+</div>
+
+<!-- ══ 4. STUDIO ══ -->
+<div class="app hide" id="g-app">
+  <aside class="side">
+    <div class="brand"><b>SYSTEMIC THRIVE</b><span>Studio</span></div>
+    <div class="lbl">Courses</div>
+    <div class="clist" id="clist"></div>
+    <div class="newc"><button onclick="newCourse()">+ New course</button></div>
+    <div class="foot">
+      <b id="whoami"></b>
+      <button onclick="signOut()">Sign out</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="top">
+      <div>
+        <h1 id="topTitle">Course builder</h1>
+        <div class="sub" id="topSub">—</div>
+      </div>
+      <div class="right">
+        <span class="savedot" id="savedot"></span>
+        <button class="btn b-ghost" id="delBtn" onclick="deleteCourse()">Delete course</button>
+        <button class="btn b-gold" id="pubBtn" onclick="togglePublish()">Publish</button>
+      </div>
+    </div>
+
+    <div class="pad">
+      <div class="build">
+        <div class="card">
+          <div class="meta">
+            <div class="f" style="margin:0">
+              <label for="cTitle">Course title</label>
+              <input id="cTitle">
+            </div>
+            <div class="f" style="margin:0">
+              <label for="cTrack">Track</label>
+              <select id="cTrack"><option>Foundations</option><option>Sustaining</option><option>Leading</option></select>
+            </div>
+            <div class="f" style="margin:0">
+              <label for="cCe">CE hours</label>
+              <input id="cCe" inputmode="decimal">
+            </div>
+          </div>
+          <div id="units"></div>
+          <button class="add-unit" onclick="addUnit()">+ Add unit</button>
+        </div>
+
+        <div class="prev">
+          <div class="phone">
+            <div class="screen">
+              <div class="p-head">
+                <span class="ops" id="pTrack"></span>
+                <h4 id="pTitle"></h4>
+                <div class="p-meta"><span id="pLes"></span><span id="pCe"></span></div>
+              </div>
+              <div id="pBody"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ── config: stored in this browser, or hardcode below if you prefer ── */
+var SUPABASE_URL      = localStorage.getItem('st_url') || '';
+var SUPABASE_ANON_KEY = localStorage.getItem('st_key') || '';
+
+var $ = function(i){ return document.getElementById(i); };
+var sb = null, me = null, profile = null;
+var courses = [], cur = null, units = [];
+var TYPES = ['video','read','quiz','live'];
+
+/* ---------- ui helpers ---------- */
+var tmr;
+function say(m, bad){
+  var t = $('toast');
+  t.textContent = m;
+  t.className = 'toast show' + (bad ? ' bad' : '');
+  clearTimeout(tmr);
+  tmr = setTimeout(function(){ t.className = 'toast' + (bad ? ' bad' : ''); }, 2200);
+}
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function screen(id){
+  ['g-setup','g-login','g-noadmin','g-app'].forEach(function(x){
+    $(x).classList.toggle('hide', x !== id);
+  });
+}
+var saveTimer, pending = 0;
+function saving(){ pending++; $('savedot').className = 'savedot on'; $('savedot').textContent = 'Saving'; }
+function saved(){
+  pending = Math.max(0, pending - 1);
+  if(pending === 0){
+    $('savedot').className = 'savedot done';
+    $('savedot').textContent = 'Saved';
+    setTimeout(function(){ if(pending===0) $('savedot').textContent = ''; }, 2000);
+  }
+}
+function oops(e){ console.error(e); say((e && e.message) || 'Something went wrong', true); saved(); }
+
+/* ---------- boot ---------- */
+(async function boot(){
+  if(!SUPABASE_URL || !SUPABASE_ANON_KEY){ screen('g-setup'); return; }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  var res = await sb.auth.getSession();
+  if(!res.data.session){ screen('g-login'); return; }
+  me = res.data.session.user;
+
+  var p = await sb.from('profiles').select('*').eq('id', me.id).maybeSingle();
+  profile = p.data;
+
+  if(!profile || profile.role !== 'admin'){
+    $('promoteSql').textContent =
+      "update public.profiles set role = 'admin' where email = '" + me.email + "';";
+    screen('g-noadmin'); return;
+  }
+
+  $('whoami').textContent = me.email;
+  screen('g-app');
+  await loadCourses();
+})();
+
+/* ---------- config save ---------- */
+$('cfgSave').onclick = function(){
+  var u = $('cfgUrl').value.trim().replace(/\/+$/,'');
+  var k = $('cfgKey').value.trim();
+  if(!/^https:\/\/.+\.supabase\.co$/.test(u)){
+    $('cfgMsg').innerHTML = '<div class="msg err">That URL looks off. It should be https://something.supabase.co</div>'; return;
+  }
+  if(k.indexOf('ey') !== 0 || k.length < 40){
+    $('cfgMsg').innerHTML = '<div class="msg err">That key looks off. The anon public key is a long string starting with ey</div>'; return;
+  }
+  localStorage.setItem('st_url', u);
+  localStorage.setItem('st_key', k);
+  $('cfgMsg').innerHTML = '<div class="msg ok">Connected. Reloading…</div>';
+  setTimeout(function(){ location.reload(); }, 700);
+};
+['cfgUrl','cfgKey'].forEach(function(id){
+  $(id).addEventListener('keydown', function(e){ if(e.key==='Enter') $('cfgSave').click(); });
+});
+
+/* ---------- auth ---------- */
+$('sendLink').onclick = async function(){
+  var email = $('email').value.trim();
+  if(!email){ $('loginMsg').innerHTML = '<div class="msg err">Enter an email address.</div>'; return; }
+  this.disabled = true; this.textContent = 'Sending…';
+  var r = await sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.href.split('#')[0] } });
+  this.disabled = false; this.textContent = 'Email me a sign-in link';
+  $('loginMsg').innerHTML = r.error
+    ? '<div class="msg err">' + esc(r.error.message) + '</div>'
+    : '<div class="msg ok">Check your inbox. The link signs you straight in — you can close this tab.</div>';
+};
+$('email') && $('email').addEventListener('keydown', function(e){ if(e.key==='Enter') $('sendLink').click(); });
+
+async function signOut(){ await sb.auth.signOut(); location.reload(); }
+
+/* ---------- courses ---------- */
+async function loadCourses(){
+  var r = await sb.from('courses').select('*').order('sort_order').order('created_at');
+  if(r.error) return oops(r.error);
+  courses = r.data || [];
+  paintCourseList();
+  if(courses.length) await openCourse((cur && courses.some(function(c){return c.id===cur.id;})) ? cur.id : courses[0].id);
+  else { units = []; cur = null; $('units').innerHTML = ''; paintPreview(); }
+}
+
+function paintCourseList(){
+  $('clist').innerHTML = courses.map(function(c){
+    return '<button aria-current="' + (cur && c.id === cur.id) + '" onclick="openCourse(\'' + c.id + '\')">'
+      + esc(c.title) + '<em>' + esc(c.track) + ' · ' + c.status + '</em></button>';
+  }).join('') || '<div style="padding:10px 12px;font-size:13px;color:#7E95BA">No courses yet.</div>';
+}
+
+async function openCourse(id){
+  cur = courses.filter(function(c){ return c.id === id; })[0];
+  if(!cur) return;
+  $('cTitle').value = cur.title || '';
+  $('cTrack').value = cur.track || 'Foundations';
+  $('cCe').value    = cur.ce_hours != null ? cur.ce_hours : '';
+  paintTop(); paintCourseList();
+
+  var u = await sb.from('units').select('*').eq('course_id', id).order('sort_order');
+  if(u.error) return oops(u.error);
+  var l = await sb.from('lessons').select('*').eq('course_id', id).order('sort_order');
+  if(l.error) return oops(l.error);
+
+  units = (u.data || []).map(function(x){
+    x.lessons = (l.data || []).filter(function(y){ return y.unit_id === x.id; });
+    return x;
+  });
+  paintUnits();
+}
+
+function paintTop(){
+  $('topTitle').textContent = cur ? cur.title : 'Course builder';
+  $('topSub').textContent = cur
+    ? (cur.status === 'published' ? 'Live · visible in the catalog' : 'Draft · autosaves as you type')
+    : '—';
+  $('pubBtn').textContent = cur && cur.status === 'published' ? 'Unpublish' : 'Publish';
+  $('pubBtn').className = 'btn ' + (cur && cur.status === 'published' ? 'b-ghost' : 'b-gold');
+}
+
+async function newCourse(){
+  saving();
+  var r = await sb.from('courses').insert({ title:'Untitled course', sort_order: courses.length }).select().single();
+  saved();
+  if(r.error) return oops(r.error);
+  cur = r.data;
+  await loadCourses();
+  say('Course created');
+  $('cTitle').focus(); $('cTitle').select();
+}
+
+async function deleteCourse(){
+  if(!cur) return;
+  if(!confirm('Delete "' + cur.title + '" and everything in it? This cannot be undone.')) return;
+  saving();
+  var r = await sb.from('courses').delete().eq('id', cur.id);
+  saved();
+  if(r.error) return oops(r.error);
+  cur = null;
+  await loadCourses();
+  say('Course deleted');
+}
+
+async function togglePublish(){
+  if(!cur) return;
+  var next = cur.status === 'published' ? 'draft' : 'published';
+  saving();
+  var r = await sb.from('courses').update({ status: next, updated_at: new Date().toISOString() }).eq('id', cur.id);
+  saved();
+  if(r.error) return oops(r.error);
+  cur.status = next;
+  courses = courses.map(function(c){ return c.id === cur.id ? cur : c; });
+  paintTop(); paintCourseList();
+  say(next === 'published' ? 'Course is live' : 'Back to draft');
+}
+
+/* debounced course-meta save */
+function queueCourseSave(){
+  if(!cur) return;
+  cur.title    = $('cTitle').value;
+  cur.track    = $('cTrack').value;
+  cur.ce_hours = parseFloat($('cCe').value) || 0;
+  paintTop(); paintCourseList(); paintPreview();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async function(){
+    saving();
+    var r = await sb.from('courses').update({
+      title: cur.title, track: cur.track, ce_hours: cur.ce_hours,
+      updated_at: new Date().toISOString()
+    }).eq('id', cur.id);
+    saved();
+    if(r.error) oops(r.error);
+  }, 700);
+}
+['cTitle','cTrack','cCe'].forEach(function(id){
+  $(id).addEventListener('input', queueCourseSave);
+  $(id).addEventListener('change', queueCourseSave);
+});
+
+/* ---------- units + lessons ---------- */
+function paintUnits(){
+  $('units').innerHTML = units.map(function(u, ui){
+    return '<div class="unit">'
+      + '<div class="unit-h"><span class="ops">Unit ' + String(ui+1).padStart(2,'0') + '</span>'
+      + '<input value="' + esc(u.title) + '" oninput="renameUnit(\'' + u.id + '\', this.value)">'
+      + '<button class="x" title="Delete unit" onclick="delUnit(\'' + u.id + '\')">&times;</button></div>'
+      + u.lessons.map(function(l){
+          return '<div class="les" draggable="true" data-l="' + l.id + '" data-u="' + u.id + '">'
+            + '<span class="grip">&#9868;</span>'
+            + '<input class="nm" value="' + esc(l.title) + '" oninput="editLesson(\'' + l.id + '\',{title:this.value})">'
+            + '<button class="free ' + (l.is_free?'on':'off') + '" title="Free preview" onclick="editLesson(\'' + l.id + '\',{is_free:' + (!l.is_free) + '},true)">Free</button>'
+            + '<button class="tag ' + l.kind + '" title="Change type" onclick="cycleKind(\'' + l.id + '\')">' + l.kind + '</button>'
+            + '<input class="dur" value="' + esc(l.duration) + '" oninput="editLesson(\'' + l.id + '\',{duration:this.value})">'
+            + '<button class="x" title="Delete lesson" onclick="delLesson(\'' + l.id + '\')">&times;</button>'
+            + '</div>';
+        }).join('')
+      + '<button class="add" onclick="addLesson(\'' + u.id + '\')">+ Add lesson</button>'
+      + '</div>';
+  }).join('');
+  wireDrag();
+  paintPreview();
+}
+
+function findLesson(id){
+  for(var i=0;i<units.length;i++){
+    var f = units[i].lessons.filter(function(l){ return l.id === id; })[0];
+    if(f) return { l:f, u:units[i] };
+  }
+  return null;
+}
+
+var lessonTimers = {};
+function editLesson(id, patch, repaint){
+  var f = findLesson(id); if(!f) return;
+  Object.keys(patch).forEach(function(k){ f.l[k] = patch[k]; });
+  if(repaint) paintUnits(); else paintPreview();
+  clearTimeout(lessonTimers[id]);
+  lessonTimers[id] = setTimeout(async function(){
+    saving();
+    var r = await sb.from('lessons').update(patch).eq('id', id);
+    saved();
+    if(r.error) oops(r.error);
+  }, 700);
+}
+
+function cycleKind(id){
+  var f = findLesson(id); if(!f) return;
+  var next = TYPES[(TYPES.indexOf(f.l.kind) + 1) % TYPES.length];
+  editLesson(id, { kind: next }, true);
+}
+
+var unitTimers = {};
+function renameUnit(id, title){
+  var u = units.filter(function(x){ return x.id === id; })[0]; if(!u) return;
+  u.title = title; paintPreview();
+  clearTimeout(unitTimers[id]);
+  unitTimers[id] = setTimeout(async function(){
+    saving();
+    var r = await sb.from('units').update({ title: title }).eq('id', id);
+    saved();
+    if(r.error) oops(r.error);
+  }, 700);
+}
+
+async function addUnit(){
+  if(!cur) return;
+  saving();
+  var r = await sb.from('units').insert({ course_id: cur.id, title:'New unit', sort_order: units.length }).select().single();
+  saved();
+  if(r.error) return oops(r.error);
+  r.data.lessons = [];
+  units.push(r.data);
+  paintUnits(); say('Unit added');
+}
+
+async function delUnit(id){
+  if(!confirm('Delete this unit and its lessons?')) return;
+  saving();
+  var r = await sb.from('units').delete().eq('id', id);
+  saved();
+  if(r.error) return oops(r.error);
+  units = units.filter(function(u){ return u.id !== id; });
+  paintUnits(); say('Unit removed');
+}
+
+async function addLesson(unitId){
+  var u = units.filter(function(x){ return x.id === unitId; })[0]; if(!u) return;
+  saving();
+  var r = await sb.from('lessons').insert({
+    unit_id: unitId, course_id: cur.id, title:'New lesson',
+    kind:'video', duration:'5:00', sort_order: u.lessons.length
+  }).select().single();
+  saved();
+  if(r.error) return oops(r.error);
+  u.lessons.push(r.data);
+  paintUnits(); say('Lesson added');
+}
+
+async function delLesson(id){
+  saving();
+  var r = await sb.from('lessons').delete().eq('id', id);
+  saved();
+  if(r.error) return oops(r.error);
+  units.forEach(function(u){ u.lessons = u.lessons.filter(function(l){ return l.id !== id; }); });
+  paintUnits(); say('Lesson removed');
+}
+
+/* ---------- drag to reorder (persists sort_order) ---------- */
+var from = null;
+function wireDrag(){
+  document.querySelectorAll('.les').forEach(function(el){
+    el.addEventListener('dragstart', function(e){
+      from = { l: el.dataset.l, u: el.dataset.u };
+      el.classList.add('drag');
+      e.dataTransfer.effectAllowed = 'move';
+      try{ e.dataTransfer.setData('text/plain','x'); }catch(_){}
+    });
+    el.addEventListener('dragend', function(){
+      el.classList.remove('drag');
+      document.querySelectorAll('.les').forEach(function(x){ x.classList.remove('over'); });
+    });
+    el.addEventListener('dragover', function(e){ e.preventDefault(); el.classList.add('over'); });
+    el.addEventListener('dragleave', function(){ el.classList.remove('over'); });
+    el.addEventListener('drop', async function(e){
+      e.preventDefault();
+      if(!from) return;
+      var toUnit = el.dataset.u, toId = el.dataset.l;
+      var src = findLesson(from.l); if(!src) return;
+
+      // remove from old unit
+      src.u.lessons = src.u.lessons.filter(function(l){ return l.id !== src.l.id; });
+      // insert into new unit at target index
+      var tgt = units.filter(function(u){ return u.id === toUnit; })[0];
+      var idx = tgt.lessons.findIndex(function(l){ return l.id === toId; });
+      src.l.unit_id = toUnit;
+      tgt.lessons.splice(idx < 0 ? tgt.lessons.length : idx, 0, src.l);
+      from = null;
+      paintUnits();
+
+      // persist new order for both affected units
+      saving();
+      var rows = [];
+      units.forEach(function(u){
+        u.lessons.forEach(function(l, i){
+          if(l.sort_order !== i || l.unit_id !== u.id){
+            l.sort_order = i; l.unit_id = u.id;
+          }
+          rows.push({ id: l.id, unit_id: u.id, sort_order: i });
+        });
+      });
+      var r = await sb.from('lessons').upsert(rows, { onConflict: 'id' });
+      saved();
+      if(r.error) oops(r.error); else say('Reordered');
+    });
+  });
+}
+
+/* ---------- student preview ---------- */
+function paintPreview(){
+  var n = units.reduce(function(s,u){ return s + u.lessons.length; }, 0);
+  $('pTrack').textContent = cur ? ('Track · ' + (cur.track || '')) : '';
+  $('pTitle').textContent = cur ? (cur.title || 'Untitled course') : '—';
+  $('pLes').textContent   = n + ' lesson' + (n === 1 ? '' : 's');
+  $('pCe').textContent    = (cur && cur.ce_hours ? cur.ce_hours : 0) + ' CE hrs';
+  $('pBody').innerHTML = n === 0
+    ? '<div class="p-empty">No lessons yet.<br>Add one and it appears here.</div>'
+    : units.map(function(u, ui){
+        return '<div class="p-unit">Unit ' + (ui+1) + ' · ' + esc(u.title) + '</div>'
+          + u.lessons.map(function(l){
+              return '<div class="p-les"><span class="tick"></span><span class="t">' + esc(l.title)
+                + '</span><span class="d">' + esc(l.duration) + '</span></div>';
+            }).join('');
+      }).join('');
+}
+</script>
+</body>
+</html>
